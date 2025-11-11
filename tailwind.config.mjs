@@ -1,12 +1,7 @@
-import { plugin as FlowbitePlugin, content as FlowbiteContent } from "flowbite-react/tailwind";
-
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: ["class"],
-    content: [
-        "./src/**/*.{astro,tsx}",
-        FlowbiteContent()
-    ],
+    content: ["./src/**/*.{astro,tsx}"],
     theme: {
         extend: {
             keyframes: {
@@ -20,7 +15,5 @@ export default {
             }
         }
     },
-    plugins: [
-        FlowbitePlugin()
-    ]
+    plugins: []
 };
