@@ -1,11 +1,12 @@
 import type { APIRoute } from "astro";
 import { supabase } from "@/lib/supabase";
 
-export const GET: APIRoute = async ({ redirect }) => {
+export const GET: APIRoute = async ({ redirect, request }) => {
+    const origin = new URL(request.url).origin;
     const { data: authData, error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-            redirectTo: "/api/auth/callback"
+            redirectTo: `${origin}/api/auth/callback`
         }
     });
 

@@ -38,7 +38,7 @@ const handleSession = async (cookies: AstroCookies): Promise<AuthSession> => {
 };
 
 const routes = {
-    public: ["/api/**", "/product/**"],
+    public: ["/api/**", "/product/**", "/api/auth/**"],
     redirect: ["/login(|/)", "/register(|/)"],
     admin: ["/admin/**"],
     product: ["/product/**"]
