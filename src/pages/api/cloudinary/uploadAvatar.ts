@@ -46,11 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     try {
-        console.log("Starting upload for user ID:", id);
-        console.log("File details:", { name: file.name, size: file.size, type: file.type });
-
         const response = await uploadAvatar({ id, file });
-        console.log("Upload successful:", response);
         return new Response(JSON.stringify({ url: response.url }), {
             status: 200,
             headers: { "Content-Type": "application/json" }

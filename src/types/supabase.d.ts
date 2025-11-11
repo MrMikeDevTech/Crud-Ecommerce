@@ -11,17 +11,10 @@ export type RawSession = {
 
 export type RawCart = {
     id: string;
+    user_id: string;
+    items: string;
     created_at: string;
     updated_at: string;
-    items?: RawCartItem[];
-};
-
-export type RawCartItem = {
-    id: string;
-    cart_id: string;
-    product_id: string;
-    quantity: number;
-    added_at: string;
 };
 
 export type RawProduct = {

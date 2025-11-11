@@ -29,7 +29,6 @@ export default function TestimonialSectionAdmin() {
         const q = testimonialQuery.toLowerCase();
 
         const filtered = testimonials.filter((t) => {
-            console.log(t);
             return (
                 t.author.full_name.toLowerCase().includes(q) ||
                 t.author.email.toLowerCase().includes(q) ||

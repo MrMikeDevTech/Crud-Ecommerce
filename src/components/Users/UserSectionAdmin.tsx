@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import UserSearch from "@/components/Users/UserSearch";
 import Loader from "@/components/Loader";
 import type { RawSession } from "@/types/supabase";
-import { getAllSessions } from "@/services/supabase";
+import { getAllSessions, deleteCooldownAvatar } from "@/services/supabase";
 import { toast } from "react-toastify";
+import UserTable from "./UserTable";
 
 export default function UserSectionAdmin() {
     const [userQuery, setUserQuery] = useState<string>("");
     const [users, setUsers] = useState<RawSession[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<RawSession[]>([]);
     const [selectedUser, setSelectedUser] = useState<RawSession | null>(null);
+    const [modalDeleteCooldown, setModalDeleteCooldown] = useState<boolean>(false);
     const [modalDelete, setModalDelete] = useState<boolean>(false);
     const [loadingList, setLoadingList] = useState<boolean>(true);
 
@@ -30,6 +32,25 @@ export default function UserSectionAdmin() {
         );
     }, [userQuery, users]);
 
+    const handleDeleteCooldown = async () => {
+        try {
+            if (!selectedUser) return;
+
+            const { success, error } = await deleteCooldownAvatar(selectedUser.id);
+
+            if (!success || error) throw new Error(error || "Error al eliminar cooldown de avatar");
+
+            toast.success("Cooldown de avatar eliminado correctamente");
+            setUsers((prev) => prev.map((u) => (u.id === selectedUser.id ? { ...u, avatar_last_modified: null } : u)));
+            setFilteredUsers((prev) =>
+                prev.map((u) => (u.id === selectedUser.id ? { ...u, avatar_last_modified: null } : u))
+            );
+            setModalDeleteCooldown(false);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Error desconocido");
+        }
+    };
+
     const handleDelete = async () => {
         try {
             if (!selectedUser) return;
@@ -46,7 +67,6 @@ export default function UserSectionAdmin() {
 
             toast.success("Usuario eliminado correctamente");
 
-            // Quitar de la lista sin recargar
             setUsers((prev) => prev.filter((u) => u.id !== userId));
             setFilteredUsers((prev) => prev.filter((u) => u.id !== userId));
 
@@ -67,10 +87,22 @@ export default function UserSectionAdmin() {
             ) : (
                 <UserTable
                     filteredUsers={filteredUsers}
+                    onDeleteCooldown={(user) => {
+                        setSelectedUser(user);
+                        setModalDeleteCooldown(true);
+                    }}
                     onDelete={(user) => {
                         setSelectedUser(user);
                         setModalDelete(true);
                     }}
+                />
+            )}
+
+            {modalDeleteCooldown && selectedUser && (
+                <ModalDeleteCooldown
+                    user={selectedUser}
+                    onClose={() => setModalDeleteCooldown(false)}
+                    onConfirm={handleDeleteCooldown}
                 />
             )}
 
@@ -81,71 +113,68 @@ export default function UserSectionAdmin() {
     );
 }
 
-function UserTable({
-    filteredUsers,
-    onDelete
+function ModalDeleteCooldown({
+    user,
+    onClose,
+    onConfirm
 }: {
-    filteredUsers: RawSession[] | null;
-    /* eslint-disable-next-line no-unused-vars */
-    onDelete: (user: RawSession) => void;
+    user: RawSession;
+    onClose: () => void;
+    onConfirm: () => Promise<void>;
 }) {
-    const HEADERS = ["Usuario", "Email", "Creado", "Acciones"];
+    const [countdown, setCountdown] = useState(5);
+    const [canConfirm, setCanConfirm] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setCanConfirm(true);
+        }
+    }, [countdown]);
+
+    const handleConfirm = async () => {
+        setLoading(true);
+        await onConfirm();
+        setLoading(false);
+        onClose();
+    };
 
     return (
-        <table className="w-full py-6 px-8 mx-5 mt-5 mb-3 sm:w-auto border-collapse border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden">
-            <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800 [&>th]:p-4 [&>th]:text-gray-900 [&>th]:dark:text-gray-100 [&>th]:font-medium [&>th]:text-center">
-                    {HEADERS.map((header) => (
-                        <th key={header}>{header}</th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {filteredUsers && filteredUsers.length > 0 ? (
-                    filteredUsers.map((user, index) => (
-                        <UserRow key={user.id} user={user} index={index} onDelete={() => onDelete(user)} />
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={5} className="text-center py-6 text-gray-600 dark:text-gray-300">
-                            No se encontraron usuarios.
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
-    );
-}
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-md shadow-xl text-center">
+                <h2 className="text-yellow-500 text-xl font-bold mb-4">Eliminar Cooldown de Avatar</h2>
 
-function UserRow({ user, index, onDelete }: { user: RawSession; index: number; onDelete: () => void }) {
-    return (
-        <tr
-            className={`border-b border-gray-300 dark:border-gray-600 hover:brightness-90 transition [&>td]:p-4 ${
-                index % 2 !== 0 ? "bg-white dark:bg-gray-800" : "bg-gray-200 dark:bg-gray-900"
-            }`}
-        >
-            <td>
-                <div className="flex items-center">
-                    <img
-                        src={user.avatar_url || "/images/default-avatar.png"}
-                        className="w-10 h-10 rounded-full mr-3"
-                    />
-                    <span className="text-gray-800 dark:text-gray-200">{user.full_name}</span>
-                </div>
-            </td>
-            <td className="text-gray-700 dark:text-gray-300">{user.email}</td>
-            <td className="text-center text-gray-700 dark:text-gray-300">
-                {new Date(user.created_at).toLocaleDateString()}
-            </td>
-            <td className="flex gap-2 justify-center">
+                <p className="text-gray-700 dark:text-gray-300 mb-6">
+                    Estás a punto de permitir que <b>{user.full_name}</b> cambie nuevamente su avatar.
+                    <br />
+                    <strong className="text-yellow-500">Esto no afecta su cuenta ni privilegios.</strong>
+                </p>
+
                 <button
-                    onClick={onDelete}
-                    className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+                    onClick={handleConfirm}
+                    disabled={!canConfirm || loading}
+                    className={`flex flex-row gap-3 justify-center items-center w-full py-3 rounded-lg font-semibold shadow-md transition-all text-white ${
+                        !canConfirm || loading
+                            ? "bg-yellow-400 cursor-not-allowed"
+                            : "bg-yellow-600 hover:bg-yellow-700"
+                    }`}
                 >
-                    Eliminar
+                    {loading && <Loader />}
+                    {loading ? "Eliminando..." : canConfirm ? "Eliminar Cooldown" : `Esperar ${countdown}s`}
                 </button>
-            </td>
-        </tr>
+
+                <button
+                    onClick={onClose}
+                    disabled={loading}
+                    className="w-full mt-3 py-3 rounded-lg font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+                >
+                    Cancelar
+                </button>
+            </div>
+        </div>
     );
 }
 

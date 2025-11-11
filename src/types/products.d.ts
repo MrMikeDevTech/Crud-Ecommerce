@@ -18,6 +18,20 @@ export type Product = {
 };
 
 export type Cart = {
-    items: Product[];
+    user_id: string;
+    items: {
+        product: Product;
+        quantity: number;
+    }[];
     total: number;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type CartWithAuthor = Cart & {
+    author: {
+        full_name: string;
+        email: string;
+        avatar_url: string | null;
+    };
 };

@@ -1,5 +1,8 @@
 ---
-import PageInProgress from "@/components/PageInProgress.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
+import CartSection from "@/components/Cart/CartSection";
 ---
 
-<PageInProgress />
+<MainLayout>
+    <CartSection client:load />
+</MainLayout>

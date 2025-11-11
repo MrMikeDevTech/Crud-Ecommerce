@@ -1,4 +1,3 @@
-// src/types/auth.d.ts
 import { Cart } from "./products";
 
 export type UserSession = {
@@ -7,7 +6,7 @@ export type UserSession = {
     email: string;
     avatar_url: string | null;
     avatar_last_modified: Date | null;
-    cart: Cart[];
+    cart: Cart[] | null;
 };
 
 export type UserMetaData = {

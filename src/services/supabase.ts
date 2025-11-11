@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { RawProduct, RawSession, RawTestimonial, ProductAdmin } from "@/types/supabase";
+import type { RawProduct, RawSession, RawTestimonial, ProductAdmin, RawCart } from "@/types/supabase";
 import type { Cart, UserSession, UserMetaData, Product } from "@/types";
 import type { Session } from "@supabase/supabase-js";
 import type { AuthorType, TestimonialWithAuthor } from "@/types/testimonials";
@@ -46,6 +46,53 @@ export async function initializeUserSession({
         return null;
     }
 
+    let userCart: Cart | null = null;
+    const { data: cartData } = (await supabase.from("carts").select("*").eq("user_id", userId).maybeSingle()) as {
+        data: RawCart | null;
+        error: any;
+    };
+
+    if (cartData) {
+        const items = cartData!.items as unknown as {
+            id: string;
+            name: string;
+            image: string;
+            price: number;
+            score: number;
+            stock: number;
+            quantity: number;
+            created_at: string;
+            product_id: string;
+            description: string;
+        }[];
+        const formattedCartItems = items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            score: item.score,
+            stock: item.stock,
+            quantity: item.quantity,
+            created_at: new Date(item.created_at),
+            product: {
+                id: item.product_id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                stock: item.stock,
+                description: item.description
+            }
+        })) as Cart["items"];
+        const formatedCartTotal = calculateCartTotal(formattedCartItems, []) || 0;
+        userCart = {
+            items: formattedCartItems,
+            total: formatedCartTotal,
+            user_id: cartData.user_id,
+            created_at: cartData.created_at,
+            updated_at: cartData.updated_at
+        };
+    }
+
     if (dbSession) {
         const isCloudinaryAvatar = dbSession.avatar_url?.includes("res.cloudinary.com");
         const isSupabaseAvatar =
@@ -65,17 +112,15 @@ export async function initializeUserSession({
                     avatar_last_modified: new Date().toISOString()
                 })
                 .eq("id", userId);
-            console.log("Updated avatar from Supabase metadata for user:", userId);
         }
 
-        const userCart: Cart = { items: [], total: 0 };
         return {
             id: dbSession.id,
             full_name: dbSession.full_name,
             email: dbSession.email,
             avatar_url: dbSession.avatar_url,
             avatar_last_modified: dbSession.avatar_last_modified,
-            cart: [userCart]
+            cart: userCart ? [userCart] : []
         };
     } else {
         const { data: newSession, error: insertError } = await supabase
@@ -95,15 +140,13 @@ export async function initializeUserSession({
             return null;
         }
 
-        const userCart: Cart = { items: [], total: 0 };
-
         return {
             id: newSession.id,
             full_name: newSession.full_name,
             email: newSession.email,
             avatar_url: newSession.avatar_url,
             avatar_last_modified: newSession.avatar_last_modified,
-            cart: [userCart]
+            cart: null
         };
     }
 }
@@ -165,6 +208,127 @@ export async function getLastAvatarUpdate(id: string): Promise<{
     };
 }
 
+export function calculateCartTotal(items: Cart["items"], products: Product[]): number {
+    return items.reduce((total, item) => {
+        const product = products.find((p) => p.id === item.product.id);
+        return total + (product ? product.price * item.quantity : 0);
+    }, 0);
+}
+
+export async function addToCart(userId: string, product: Product, quantity: number) {
+    const { data: carts } = await supabase.from("carts").select("id, items").eq("user_id", userId);
+
+    const cart = carts?.[0] ?? null;
+
+    if (carts && carts.length > 1) {
+        await supabase.from("carts").delete().neq("id", cart.id).eq("user_id", userId);
+    }
+
+    const items = cart?.items ?? [];
+    const index = items.findIndex((item: Product) => item.id === product.id);
+
+    if (index !== -1) {
+        items[index].quantity += quantity;
+    } else {
+        items.push({ ...product, quantity });
+    }
+
+    const { error } = await supabase.from("carts").upsert({ user_id: userId, items }).select().single();
+
+    return { error };
+}
+
+export async function getCartByUserId(userId: string): Promise<{
+    cart: Cart | null;
+    error: string | null;
+}> {
+    const { data, error } = await supabase.from("carts").select("*").eq("user_id", userId).limit(1).single();
+
+    if (error) return { cart: null, error: error.message };
+
+    if (!data) return { cart: null, error: null };
+
+    const items: Cart["items"] = data.items ? JSON.parse(data.items) : [];
+
+    const productIds = items.map((i) => i.product.id);
+    const { data: products } = await supabase.from("products").select("*").in("id", productIds);
+
+    const total = calculateCartTotal(items, products || []);
+
+    const cart: Cart = {
+        ...data,
+        items,
+        total
+    };
+
+    return { cart, error: null };
+}
+
+export async function updateCart(
+    userId: string,
+    cartItems: Cart["items"]
+): Promise<{
+    updatedCart: Cart | null;
+    error: string | null;
+}> {
+    const itemsString = JSON.stringify(cartItems);
+
+    const { data, error } = await supabase
+        .from("carts")
+        .upsert({ user_id: userId, items: itemsString })
+        .select()
+        .single();
+
+    if (error) return { updatedCart: null, error: error.message };
+
+    const productIds = cartItems.map((i) => i.product.id);
+    const { data: products } = await supabase.from("products").select("*").in("id", productIds);
+
+    const total = calculateCartTotal(cartItems, products || []);
+
+    return {
+        updatedCart: { ...data, items: cartItems, total },
+        error: null
+    };
+}
+
+export async function clearCart(userId: string): Promise<{
+    success: boolean;
+    error: string | null;
+}> {
+    const { error } = await supabase
+        .from("carts")
+        .update({ items: JSON.stringify([]) })
+        .eq("user_id", userId);
+    return { success: !error, error: error?.message || null };
+}
+
+export async function getAllCarts(): Promise<{
+    carts: Cart[];
+    error: string | null;
+}> {
+    const { data, error } = await supabase.from("carts").select("*");
+
+    if (error) return { carts: [], error: error.message };
+
+    const carts: Cart[] = [];
+
+    for (const cart of data) {
+        const items: Cart["items"] = cart.items ? JSON.parse(cart.items) : [];
+
+        const productIds = items.map((i) => i.product.id);
+        const { data: products } = await supabase.from("products").select("*").in("id", productIds);
+
+        carts.push({
+            ...cart,
+            items,
+            total: calculateCartTotal(items, products || [])
+        });
+    }
+
+    return { carts, error: null };
+}
+
 export async function getAllSessions(): Promise<{
     sessions: RawSession[];
     error: string | null;
@@ -193,6 +357,14 @@ export async function updateSession(
 }> {
     const { data, error } = await supabase.from("sessions").update(fields).eq("id", id).select().single();
     return { updated: data, error: error?.message || null };
+}
+
+export async function deleteCooldownAvatar(id: string): Promise<{
+    success: boolean;
+    error: string | null;
+}> {
+    const { error } = await supabase.from("sessions").update({ avatar_last_modified: null }).eq("id", id);
+    return { success: !error, error: error?.message || null };
 }
 
 export async function deleteSession(id: string): Promise<{
