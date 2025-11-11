@@ -1,4 +1,4 @@
-export const DEV = import.meta.env.DEV ?? false;
+export const DEV = Boolean(import.meta.env.DEV);
 export const CLOUDINARY_CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 export const CLOUDINARY_API_KEY = import.meta.env.PUBLIC_CLOUDINARY_API_KEY;
 export const CLOUDINARY_API_SECRET = import.meta.env.PUBLIC_CLOUDINARY_API_SECRET;
