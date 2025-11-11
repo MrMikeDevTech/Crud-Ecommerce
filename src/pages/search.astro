@@ -1,0 +1,9 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import SearchSection from "@/components/SearchSection/SearchSection";
+const query = Astro.url.searchParams.get("q") || "";
+---
+
+<MainLayout>
+    <SearchSection query={query} client:load />
+</MainLayout>

@@ -1,0 +1,52 @@
+---
+import { ViewTransitions } from "astro:transitions";
+import { TITLE_PAGE, DESCRIPTION_PAGE, KEYWORDS_PAGE, AUTHORS } from "@/consts";
+
+interface Props {
+    title?: string;
+}
+const { title } = Astro.props as Props;
+---
+
+<>
+    <meta charset="utf-8" />
+    <title>{title ? `${TITLE_PAGE} - ${title}` : TITLE_PAGE}</title>
+    <meta name="description" content={DESCRIPTION_PAGE} />
+    <meta name="keywords" content={KEYWORDS_PAGE} />
+    <link rel="icon" type="image/svg" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+
+    <script is:inline src="/scripts/theme.js"></script>
+
+    {
+        AUTHORS.map((author: { name: string; twitter: string; github: string }) => (
+            <>
+                <meta name="author" content={author.name} />
+                <meta name="twitter:creator" content={author.twitter} />
+                <meta name="github" content={author.github} />
+                {[
+                    { name: "twitter:site", content: author.twitter },
+                    { name: "twitter:card", content: "summary" },
+                    { property: "og:title", content: TITLE_PAGE },
+                    { property: "og:description", content: DESCRIPTION_PAGE },
+                    { property: "og:type", content: "website" },
+                    { property: "og:url", content: author.twitter },
+                    { property: "og:image", content: `https://github.com/${author.github}.png` },
+                    { property: "og:site_name", content: TITLE_PAGE },
+                    { property: "og:locale", content: "es_ES" },
+                    { rel: "canonical", href: author.twitter }
+                ].map((meta) =>
+                    meta.name ? (
+                        <meta name={meta.name} content={meta.content} />
+                    ) : meta.property ? (
+                        <meta property={meta.property} content={meta.content} />
+                    ) : (
+                        <link rel={meta.rel} href={meta.href} />
+                    )
+                )}
+            </>
+        ))
+    }
+</>
+
+<ViewTransitions />

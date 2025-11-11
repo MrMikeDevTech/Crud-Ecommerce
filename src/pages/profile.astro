@@ -1,0 +1,67 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import Avatar from "@/components/Profile/Avatar";
+import ChangeAvatarInput from "@/components/Profile/ChangeAvatarInput";
+import SessionName from "@/components/Profile/SessionName";
+import SessionEmail from "@/components/Profile/SessionEmail";
+import AvatarChangeTimer from "@/components/Profile/AvatarChangeTimer";
+import DeleteAccount from "@/components/Profile/DeleteAccount";
+---
+
+<MainLayout>
+    <div class="w-full max-w-2xl mx-auto p-8 space-y-10">
+        <section
+            class="flex flex-col items-center text-center bg-white dark:bg-gray-800 rounded-2xl shadow-md py-10 px-6"
+        >
+            <picture class="relative mb-4">
+                <Avatar size="xl" client:load />
+                <ChangeAvatarInput client:load />
+            </picture>
+
+            <div class="space-y-1">
+                <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                    <SessionName client:load />
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400">
+                    <SessionEmail client:load />
+                </p>
+            </div>
+
+            <div class="mt-6 border-t border-gray-200 dark:border-gray-700 w-full pt-6">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Actualiza tu foto de perfil para personalizar tu cuenta.
+                </p>
+
+                <AvatarChangeTimer client:load />
+            </div>
+        </section>
+
+        <section class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 space-y-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Información de la cuenta</h3>
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300">
+                <li class="flex justify-between py-3">
+                    <span>Nombre completo</span>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">
+                        <SessionName client:load />
+                    </span>
+                </li>
+                <li class="flex justify-between py-3">
+                    <span>Correo electrónico</span>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">
+                        <SessionEmail client:load />
+                    </span>
+                </li>
+                <li class="flex justify-between py-3">
+                    <span>Tipo de cuenta</span>
+                    <span class="font-medium text-blue-600 dark:text-blue-400">Usuario registrado</span>
+                </li>
+                <li class="flex justify-between py-3">
+                    <span>Estado</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">Activo</span>
+                </li>
+            </ul>
+        </section>
+
+        <DeleteAccount client:load />
+    </div>
+</MainLayout>

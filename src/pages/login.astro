@@ -1,0 +1,44 @@
+---
+import LoginLayout from "@/layouts/LoginLayout.astro";
+import GoogleAuthButton from "@/components/GoogleAuthButton.astro";
+---
+
+<LoginLayout>
+    <section
+        class="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-b dark:from-[#0a0f1f] dark:via-[#0f1629] dark:to-[#1a2238] from-gray-100 via-gray-200 to-gray-300"
+    >
+        <div class="absolute -top-20 -left-20 w-96 h-96 dark:bg-blue-600/30 bg-blue-400/30 rounded-full blur-3xl animate-pulse"></div>
+        <div
+            class="absolute bottom-0 right-0 w-[28rem] h-[28rem] dark:bg-purple-600/20 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-300"
+        >
+        </div>
+
+        <div class="absolute top-10 text-center">
+            <h1 class="text-4xl font-bold dark:text-white text-gray-800">Crud Ecommerce</h1>
+            <h2 class="text-lg font-medium dark:text-gray-300 text-gray-600">Programación para internet</h2>
+        </div>
+
+        <main
+            class="relative z-10 backdrop-blur-2xl dark:bg-gray-900/40 bg-white/40 dark:border-white/20 border-gray-300
+                   rounded-3xl p-10 w-[90%] sm:w-[28rem] flex flex-col items-center justify-center shadow-[0_0_40px_-10px_rgba(0,0,0,0.4)] gap-6
+                   transition-all duration-300 hover:shadow-[0_0_60px_-10px_rgba(59,130,246,0.6)]"
+        >
+            <div class="text-center mb-2 flex flex-col">
+                <h1
+                    class="text-4xl font-extrabold mb-3 bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-blue-600 to-purple-700 text-transparent bg-clip-text"
+                >
+                    Bienvenido
+                </h1>
+                <p class="dark:text-gray-300 text-gray-600 text-sm font-light">
+                    Inicia sesión con tu cuenta institucional de la <span class="font-medium dark:text-gray-100 text-gray-800">UDG</span>
+                </p>
+            </div>
+
+            <GoogleAuthButton />
+
+            <footer class="mt-6 text-xs dark:text-gray-400 text-gray-500">
+                © {new Date().getFullYear()} Universidad de Guadalajara
+            </footer>
+        </main>
+    </section>
+</LoginLayout>

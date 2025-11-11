@@ -1,0 +1,40 @@
+{
+    "name": "crud-ecommerce",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev --host --port 4000",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@algolia/autocomplete-core": "1.19.4",
+        "@astrojs/check": "0.9.2",
+        "@astrojs/react": "4.2.5",
+        "@astrojs/tailwind": "6.0.2",
+        "@astrojs/vercel": "8.1.4",
+        "@nanostores/react": "1.0.0",
+        "@supabase/supabase-js": "2.39.1",
+        "astro": "5.7.7",
+        "cloudinary": "2.6.0",
+        "micromatch": "4.0.5",
+        "nanostores": "1.0.1",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
+        "react-dropzone": "^14.3.8",
+        "react-toastify": "^11.0.5",
+        "tailwindcss": "3.4.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "9.24.0",
+        "@types/micromatch": "4.0.6",
+        "@types/node": "24.9.1",
+        "@types/react": "19.1.1",
+        "@types/react-dom": "19.1.2",
+        "eslint": "9.24.0",
+        "globals": "16.0.0",
+        "typescript": "5.5.4",
+        "typescript-eslint": "8.30.0"
+    }
+}

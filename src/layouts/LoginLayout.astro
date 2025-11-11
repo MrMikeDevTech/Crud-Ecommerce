@@ -1,0 +1,19 @@
+---
+import SEO from "@/components/SEO.astro";
+---
+
+<html lang="es">
+    <head>
+        <SEO />
+    </head>
+    <body class="bg-gray-100 dark:bg-gray-900 min-h-screen grid place-items-center">
+        <slot />
+        <style is:global>
+            * {
+                transition-property: background-color, color;
+                transition-duration: 300ms;
+                transition-timing-function: ease-in-out;
+            }
+        </style>
+    </body>
+</html>

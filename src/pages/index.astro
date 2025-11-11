@@ -1,0 +1,132 @@
+---
+import { getFeedProducts } from "@/services/api";
+import CarroucelGallery from "@/components/CarroucelGallery";
+import MainLayout from "@/layouts/MainLayout.astro";
+import Product from "@/components/Product";
+import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
+import type { Product as ProductT } from "@/types";
+
+const { threeBest: featuredProducts, latest: recentProducts } = await getFeedProducts(20);
+---
+
+<MainLayout>
+    <header class="container mx-auto px-4 py-10">
+        <div class="my-5">
+            <CarroucelGallery client:load />
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 dark:text-white">
+                    Encuentra lo que amas — precios que te sorprenden
+                </h1>
+                <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                    Ofertas diarias en tecnología, moda y hogar. Envío rápido, devoluciones sencillas y atención 24/7.
+                </p>
+
+                <div class="mt-6 flex gap-4">
+                    <a
+                        href="#destacados"
+                        class="inline-block bg-blue-600 text-white px-5 py-3 rounded-md shadow hover:bg-blue-700 transition"
+                    >
+                        Ver productos destacados
+                    </a>
+                    <a
+                        href="#ofertas"
+                        class="inline-block border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-5 py-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    >
+                        Ofertas del día
+                    </a>
+                </div>
+
+                <ul class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <li>🚚 Envío en 24-48 hrs</li>
+                    <li>⭐ Soporte 24/7</li>
+                </ul>
+            </div>
+
+            <div class="relative w-full h-80 md:h-[400px] rounded-xl overflow-hidden shadow-lg">
+                <img src="/banners/apple-banner.webp" alt="Promoción destacada" class="w-full h-full object-cover" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40 flex items-end p-6"
+                >
+                    <div>
+                        <h3 class="text-white text-2xl md:text-3xl font-bold">Oferta Especial: Apple Watch</h3>
+                        <p class="text-white/90 mt-1">Hasta 30% de descuento solo esta semana</p>
+                        <a
+                            href="/search?q=apple+watch"
+                            class="inline-block mt-3 bg-white text-black px-4 py-2 rounded-md shadow hover:bg-gray-100 transition"
+                        >
+                            Comprar ahora
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        <section id="destacados" class="my-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Productos Recientes</h2>
+                <a href="#ofertas" class="text-sm text-blue-600 hover:underline">Ver todo</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {
+                    featuredProducts.map((p: ProductT) => (
+                        <Product
+                            client:load
+                            id={p.id}
+                            name={p.name}
+                            description={p.description}
+                            price={p.price}
+                            image={p.image}
+                            noViewTransition
+                        />
+                    ))
+                }
+            </div>
+        </section>
+
+        <section id="ofertas" class="my-10">
+            <div class="w-full h-[160px] md:h-[220px] rounded-xl overflow-hidden relative">
+                <img src="/banners/samsung-banner.webp" alt="Promo" class="w-full h-full object-cover object-center" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40 flex items-center"
+                >
+                    <div class="container mx-auto px-4">
+                        <h3 class="text-white text-2xl md:text-4xl font-bold">Rebajas de primavera — hasta 40% OFF</h3>
+                        <p class="text-white/90 mt-2">
+                            Solo por tiempo limitado. Productos seleccionados en tecnología y accesorios.
+                        </p>
+                        <a href="/search?q=samsung" class="inline-block mt-4 bg-white text-black px-4 py-2 rounded"
+                            >Aprovechar oferta</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="my-10">
+            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Explorar productos</h2>
+
+            <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {
+                    recentProducts.map((p: ProductT) => (
+                        <Product
+                            client:load
+                            id={p.id}
+                            name={p.name}
+                            description={p.description}
+                            price={p.price}
+                            image={p.image}
+                            noViewTransition
+                        />
+                    ))
+                }
+            </main>
+        </section>
+
+        <TestimonialsSection client:load />
+    </main>
+</MainLayout>

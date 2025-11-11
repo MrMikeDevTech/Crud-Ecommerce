@@ -1,0 +1,33 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import UpdateProductSection from "@/components/AdminProducts/UpdateProductSection";
+import { getProduct } from "@/services/api";
+
+const { productId } = Astro.params;
+if (!productId) return Astro.redirect("/admin/dashboard/products");
+const product = await getProduct(productId!);
+if (!product) return Astro.redirect("/admin/dashboard/products");
+---
+
+<MainLayout>
+    <a
+        class="mb-6 py-2 px-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2"
+        href="/admin/dashboard/products"
+    >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            ></path>
+        </svg>
+        Volver a la página anterior
+    </a>
+
+    <section
+        class="w-full min-h-[calc(100vh-7rem)] mx-auto bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700"
+    >
+        <h1 class="text-3xl font-bold mb-6 text-center truncate" id="page-title">
+            Editar Producto: {product.name}
+        </h1>
+
+        <UpdateProductSection product={product} client:load />
+    </section>
+</MainLayout>

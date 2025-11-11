@@ -1,0 +1,89 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+
+const SECTIONS = [
+    {
+        title: "Gestión de Productos",
+        description: "Añade, edita o elimina productos de tu catálogo.",
+        link: "/admin/dashboard/products",
+        icon: "📦"
+    },
+    {
+        title: "Gestión de Testimonios",
+        description: "Revisa y modera los testimonios de los clientes.",
+        link: "/admin/dashboard/testimonials",
+        icon: "💬"
+    },
+    {
+        title: "Gestión de Usuarios",
+        description: "Administra las cuentas de los usuarios y sus permisos.",
+        link: "/admin/dashboard/users",
+        icon: "👤"
+    }
+];
+---
+
+<MainLayout>
+    <section
+        class="relative w-full h-[calc(100vh-7rem)] flex flex-col items-center justify-start overflow-hidden
+               rounded-2xl py-14 bg-gradient-to-b dark:from-[#0a0f1f] dark:via-[#0f1629] dark:to-[#1a2238]
+               from-gray-100 via-gray-200 to-gray-300"
+    >
+        <div
+            class="absolute -bottom-20 -left-20 w-80 h-80 bg-blue-600/30 dark:bg-blue-600/30 rounded-full blur-3xl animate-pulse"
+        >
+        </div>
+        <div
+            class="absolute -top-10 -right-10 w-80 h-80 bg-purple-600/25 dark:bg-purple-600/25 rounded-full blur-3xl animate-pulse delay-300"
+        >
+        </div>
+
+        <div
+            class="absolute inset-0 opacity-[0.06] pointer-events-none select-none"
+            style="background-image: linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px), 
+                                       linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+                   background-size: 50px 50px;"
+        >
+        </div>
+
+        <header class="relative z-10 text-center mb-14 animate-fadeIn">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Panel Administrativo</h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">Gestión del sistema</p>
+        </header>
+
+        <main class="relative z-10 max-w-6xl w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+            {
+                SECTIONS.map(({ title, description, link, icon }, index) => (
+                    <a href={link} class="block group">
+                        <article
+                            class={`p-7 rounded-2xl h-full
+                            bg-gray-100 dark:bg-white/10 backdrop-blur-xl border border-gray-300 dark:border-white/20
+                            shadow-md flex flex-col gap-5
+                            transition-transform duration-300
+                            hover:scale-[1.03] hover:bg-gray-200 dark:hover:bg-white/20 hover:shadow-xl
+                            opacity-0 translate-y-5 animate-fadeIn`}
+                            style={`animation-delay: ${index * 100 + 100}ms`}
+                        >
+                            <div class="text-4xl mb-2 text-gray-700 dark:text-white/70 group-hover:text-gray-900 dark:group-hover:text-white transition">
+                                {icon}
+                            </div>
+
+                            <h2
+                                class="text-2xl font-semibold
+                               bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text"
+                            >
+                                {title}
+                            </h2>
+
+                            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed flex-1">{description}</p>
+
+                            <span class="text-indigo-500 dark:text-indigo-300 text-sm font-medium underline opacity-80 group-hover:opacity-100 transition">
+                                Abrir sección →
+                            </span>
+                        </article>
+                    </a>
+                ))
+            }
+        </main>
+    </section>
+</MainLayout>

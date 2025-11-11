@@ -1,0 +1,91 @@
+---
+import { supabase } from "@/lib/supabase";
+import Header from "@/components/Header.astro";
+import SEO from "@/components/SEO.astro";
+import Session from "@/components/Session";
+import Toast from "@/components/Toast";
+const supabaseSession = await supabase.auth.getSession();
+const session = supabaseSession.data.session!;
+---
+
+<html lang="es">
+    <head>
+        <SEO />
+    </head>
+    <body class="bg-gray-100 dark:bg-gray-900 min-h-screen pt-24 flex flex-col">
+        <Header />
+
+        <main class="flex flex-col h-full flex-1 w-[90%] mx-auto">
+            <slot />
+        </main>
+
+        <style is:global>
+            * {
+                transition-property: background-color, color;
+                transition-duration: 300ms;
+                transition-timing-function: ease;
+            }
+
+            html {
+                scroll-behavior: smooth;
+                scroll-padding-top: 7rem;
+            }
+
+            .faded-out {
+                opacity: 0.25;
+                filter: blur(1px);
+                transform: scale(0.98);
+                pointer-events: none;
+                transition:
+                    opacity 0.6s ease,
+                    filter 0.6s ease,
+                    transform 0.6s ease;
+            }
+
+            input[type="number"]::-webkit-inner-spin-button,
+            input[type="number"]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            input[type="number"] {
+                -moz-appearance: textfield;
+            }
+
+            @keyframes infiniteScroll {
+                0% {
+                    transform: translate3d(0, 0, 0);
+                }
+                100% {
+                    transform: translate3d(-50%, 0, 0);
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                [style*="animation: infiniteScroll"],
+                .animate-infinite-scroll {
+                    animation: none !important;
+                }
+            }
+
+            @keyframes fadeIn {
+                0% {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .animate-fadeIn {
+                animation: fadeIn 0.6s ease-in-out forwards;
+            }
+        </style>
+
+        <Session client:only="react" currentSession={session} />
+
+        <Toast client:only="react" />
+    </body>
+</html>

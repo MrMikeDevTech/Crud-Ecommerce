@@ -1,0 +1,44 @@
+---
+import ThemeToggleButton from "@/components/ThemeToggleButton";
+import CardButtonNoti from "@/components/CardButtonNoti";
+import SearchBar from "@/components/SearchBar";
+import ProfileMenu from "@/components/Profile/ProfileMenu";
+---
+
+<header class="fixed z-20 top-0 w-full bg-white dark:bg-gray-800 shadow p-4 flex items-center justify-between h-20">
+    <div class="flex items-center space-x-4">
+        <a href="/" class="text-xl font-bold text-gray-800 dark:text-white">Ecommerce</a>
+    </div>
+
+    <SearchBar client:only="react" />
+
+    <div class="flex items-center gap-4">
+        <ThemeToggleButton client:load />
+
+        <a
+            href="/cart"
+            class="relative flex items-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-black dark:text-white"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                <path d="M17 17h-11v-14h-2"></path>
+                <path d="M6 5l14 1l-1 7h-13"></path>
+            </svg>
+            <CardButtonNoti client:load />
+        </a>
+
+        <ProfileMenu client:only="react" />
+    </div>
+</header>
