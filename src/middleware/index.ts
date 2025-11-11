@@ -1,22 +1,14 @@
 import { defineMiddleware } from "astro:middleware";
-import { DEV } from "@/lib/env";
 import { getProduct } from "@/services/api";
 import { isProductAdmin } from "@/services/supabase";
-import { LOCAL_URL_PAGE, URL_PAGE } from "@/consts";
-import { supabase } from "@/lib/supabase";
 import micromatch from "micromatch";
 import type { AstroCookies, APIContext } from "astro";
-
-const url = new URL(DEV ? LOCAL_URL_PAGE : URL_PAGE);
+import { supabase } from "@/lib/supabase";
 
 interface AuthSession {
     user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] | null;
     session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null;
     needsCookieUpdate: boolean;
-}
-
-function redirectTo(path: string) {
-    return url.origin + path;
 }
 
 const handleSession = async (cookies: AstroCookies): Promise<AuthSession> => {
@@ -56,20 +48,20 @@ const AUTH_ROUTES = [...routes.redirect, ...routes.public];
 
 const middlewareHandlers = {
     protected: (auth: AuthSession, redirect: APIContext["redirect"]) => {
-        if (!auth.user) return redirect(redirectTo("/login"));
+        if (!auth.user) return redirect("/login");
     },
 
     redirect: (auth: AuthSession, redirect: APIContext["redirect"]) => {
-        if (auth.user) return redirect(redirectTo("/"));
+        if (auth.user) return redirect("/");
     },
 
     admin: async (auth: AuthSession, redirect: APIContext["redirect"]) => {
-        if (!auth.user) return redirect(redirectTo("/login"));
+        if (!auth.user) return redirect("/login");
 
         const email = auth.user.email ?? "";
         const isAdminUser = await isProductAdmin(email);
 
-        if (!isAdminUser) return redirect(redirectTo("/"));
+        if (!isAdminUser) return redirect("/");
     },
 
     product: async ({ redirect, url }: APIContext) => {
@@ -77,13 +69,13 @@ const middlewareHandlers = {
         if (!match) return;
 
         const productId = String(match[1]);
-        if (!productId) return redirect(redirectTo("/"));
+        if (!productId) return redirect("/");
 
         try {
             const product = await getProduct(productId);
-            if (!product) return redirect(redirectTo("/"));
+            if (!product) return redirect("/");
         } catch {
-            return redirect(redirectTo("/"));
+            return redirect("/");
         }
     }
 };
@@ -96,14 +88,14 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     (ctx.locals as { auth: AuthSession }).auth = auth;
 
     if (pathname === "/admin" || pathname === "/admin/") {
-        if (!auth.user) return redirect(redirectTo("/login"));
+        if (!auth.user) return redirect("/");
 
         const email = auth.user.email ?? "";
         const isAdminUser = await isProductAdmin(email);
 
-        if (!isAdminUser) return redirect(redirectTo("/"));
+        if (!isAdminUser) return redirect("/");
 
-        return redirect(redirectTo("/admin/dashboard"));
+        return redirect("/admin/dashboard");
     }
 
     let result: Response | undefined;
